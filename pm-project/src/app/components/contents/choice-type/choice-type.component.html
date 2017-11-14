@@ -1,0 +1,221 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <b>Choice Type</b>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-12 col-md-10 center-parent">
+                <div *ngFor="let alert of alerts">
+                    <alert type="success" class="center-me" dismissOnTimeout="3000">
+                        <strong>{{alert.msg}}</strong>
+                    </alert>
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-2">
+                <button type="button" class="btn btn-primary pull-right" (click)="isClearFilter()">Clear Filter</button>
+            </div>
+        </div>
+        <div>
+            <table class="table table-bordered table-striped" id="tableContent">
+                <thead class="bg-thead">
+                    <tr>
+                        <th class="my-checkbox">
+                            <input type="checkbox" class="mycheckbox" [checked]="isAllChecked()" (change)="checkAll($event)">
+                        </th>
+                        <th>Choice Type Code</th>
+                        <th>Choice Type Abbrevation</th>
+                        <th>Choice Type Description</th>
+                        <th>Parent Choice Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="form-group-sm" id="bg-search">
+                        <td>
+
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="code" [(ngModel)]="_issearch.choiceTypeCode" #code="ngModel" (keyup)="isFindFilter();">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="abb" [(ngModel)]="_issearch.choiceTypeAbb" #abbreviation="ngModel" (keyup)="isFindFilter();">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="des" [(ngModel)]="_issearch.choiceTypeDes" #description="ngModel" (keyup)="isFindFilter();">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="parent" [(ngModel)]="_issearch.choiceTypeParent" #parent="ngModel" (keyup)="isFindByParent($event);">
+                        </td>
+                    </tr>
+                    <tr *ngFor="let ct of choiceTypes" [ngClass]="ct.checked?'isRowChecked' : ''">
+                        <td class="t-checkbox">
+                            <input type="checkbox" class="mycheckbox" (change)="getListEditChoiceType()" [(ngModel)]="ct.checked">
+                        </td>
+                        <td  (click)="gotoChoice(ct.choiceTypeCode)">{{ct.choiceTypeCode}}</td>
+                        <td>{{ct.choiceTypeAbb}}</td>
+                        <td>{{ct.choiceTypeDes}}</td>
+                        <td>{{showParent(ct.choiceTypeParent)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <pagination [directionLinks]="false" [boundaryLinks]="true" [itemsPerPage]="itemsPerPage" [totalItems]="totalItems" [(ngModel)]="currentPage"
+                    class="pagination" firstText="&laquo;" lastText="&raquo;" (pageChanged)="pageChanged($event)"></pagination>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-primary" (click)="addModal.show()">Add</button>
+                <button class="btn btn-primary" [disabled]="isCheck()" (click)="editModal.show() ||isReset(editForm) ">Edit</button>
+                <button class="btn btn-primary" [disabled]="isCheck()" (click)="deleteModal.show() || checkDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add -->
+<div bsModal #addModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" [config]='{backdrop: "static"}' aria-labelledby="myLargeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Add Choice Type</h4>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="addForm" class="css-form">
+                    <table class="table table-bordered table-striped">
+                        <thead class="bg-thead">
+                            <tr>
+                                <th>Choice Type Code</th>
+                                <th>Choice Type Abbrevation</th>
+                                <th>Choice Type Description</th>
+                                <th>Parent Choice Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="form-group-sm" *ngFor="let num of addManyChoiceType.controls; let i = index" [formGroup]="num">
+                                <td>
+                                    <input type="text" class="form-control" required formControlName="choiceTypeCode" maxlength="5" (keyup)="checkChoiceTypeParent($event)"
+                                        [ngClass]="{
+                                        'addError': addManyChoiceType.controls[i].controls.choiceTypeCode.invalid && (addManyChoiceType.controls[i].controls.choiceTypeCode.dirty || addManyChoiceType.controls[i].controls.choiceTypeCode.touched)}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" required formControlName="choiceTypeAbb" [ngClass]="{
+                                        'addError': addManyChoiceType.controls[i].controls.choiceTypeAbb.invalid && (addManyChoiceType.controls[i].controls.choiceTypeAbb.dirty || addManyChoiceType.controls[i].controls.choiceTypeAbb.touched)}">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" required formControlName="choiceTypeDes" [ngClass]="{
+                                        'addError': addManyChoiceType.controls[i].controls.choiceTypeDes.invalid && (addManyChoiceType.controls[i].controls.choiceTypeDes.dirty || addManyChoiceType.controls[i].controls.choiceTypeDes.touched)}">
+                                </td>
+                                <td>
+                                    <select class="form-control" formControlName="choiceTypeParent">
+                                        <option value=-1></option>
+                                        <option *ngFor="let cta of allChoicetype" value={{cta.choiceTypeId}}>{{cta.choiceTypeDes}} [{{cta.choiceTypeCode}}]</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" [disabled]="addForm?.invalid" (click)="createChoiceType(addForm)">Save</button>
+                <button class="btn btn-success" [disabled]="addForm?.invalid" (click)="addNewRow()">Add</button>
+                <button class="btn btn-danger" (click)="closeAdd()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Model -->
+<!-- Modal Edit -->
+<div bsModal #editModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" [config]='{backdrop: "static"}' aria-labelledby="myLargeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Edit Choice Type</h4>
+            </div>
+            <form #editForm="ngForm">
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead class="bg-thead">
+                            <tr>
+                                <th>Choice Type Code</th>
+                                <th>Choice Type Abbrevation</th>
+                                <th>Choice Type Description</th>
+                                <th>Parent Choice Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="form-group-sm bg-search" *ngFor="let edit of listEditChoiceType">
+                                <td>
+                                    <input type="text" class="form-control" required maxlength="5" minlength="5" name="choiceTypeCode-{{edit.choiceTypeId}}"
+                                        [(ngModel)]="edit.choiceTypeCode" #choiceTypeCode="ngModel" (keyup)="checkCode($event)"
+                                        [ngClass]="(errorCode===edit.choiceTypeCode||edit.choiceTypeCode.length!=5)?'errorcode':'' ">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control " required name="choiceTypeAbb-{{edit.choiceTypeId}}" [(ngModel)]="edit.choiceTypeAbb"
+                                        #choiceTypeAbb="ngModel" [ngClass]=" { 'errorcode': choiceTypeAbb.invalid && (choiceTypeAbb.dirty || choiceTypeAbb.touched) }">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" required name="choiceTypeDes-{{edit.choiceTypeId}}" [(ngModel)]="edit.choiceTypeDes"
+                                        #choiceTypeDes="ngModel" [ngClass]=" { 'errorcode': choiceTypeDes.invalid && (choiceTypeDes.dirty || choiceTypeDes.touched) }">
+                                </td>
+                                <td>
+                                    <select class="form-control" name="choiceTypeParent-{{edit.choiceTypeId}}" [(ngModel)]="edit.choiceTypeParent" #parent="ngModel">
+                                        <option selected [ngValue]="edit.choiceTypeParent">{{showParent(edit.choiceTypeParent)}}</option>
+                                        <option [ngValue]="-1"></option>
+                                        <ng-container *ngFor="let choicetype of allChoicetype">
+                                            <option *ngIf="edit.choiceTypeParent!=choicetype.choiceTypeId" [ngValue]="choicetype.choiceTypeId">{{choicetype.choiceTypeDes}} [{{choicetype.choiceTypeCode}}]</option>
+                                        </ng-container>
+                                    </select>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" (click)="editChoiceTypes() || editModal.hide()" [disabled]="isCheck() || editForm.invalid" >Save</button>
+                    <button class="btn btn-success" (click)="resetData(editForm)">Reset</button>
+                    <button class="btn btn-danger" (click)="editModal.hide() || closeEdit() ">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- End Model -->
+
+<!-- Modal Delete -->
+<div bsModal #deleteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Delete Choice Type</h4>
+            </div>
+            <ng-container *ngIf="_isdelete; else other ">
+                <div class="modal-body">
+                    Are you sure you want to delete the selected Choice Type ??
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" (click)="isDelete() || deleteModal.hide()">Yes</button>
+                    <button class="btn btn-danger" (click)="deleteModal.hide() || closeDelete()">No</button>
+                </div>
+            </ng-container>
+            <ng-template #other>
+                <div class="modal-body">
+                    <span>The Choice Type
+                        <b>[
+                            <ng-container *ngFor="let parent of _isparent">
+                                {{parent}}
+                            </ng-container>
+                            ]</b> is currently Parent Choice Type of
+                        <b>[ {{isNotDelete()}} ]</b>
+                    </span>
+                    <p>Choice Type cannot be removed.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" (click)="deleteModal.hide() || closeDelete()"> Close </button>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+<!-- End Model -->

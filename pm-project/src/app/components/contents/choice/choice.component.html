@@ -1,0 +1,188 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <a class="btn btn-success" routerLink="/choice-type" routerLinkActive="active"><i class="fa fa-reply" aria-hidden="true"></i></a>
+        <b>Choice</b>
+    </div>
+    <div class="panel-body">
+        <div class="pull-right margin-fitler">
+            <button class="btn btn-primary" (click)="clearFilter()" >Clear Filter</button>
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead class="bg-thead">
+                    <tr>
+                        <th class="my-checkbox">
+                            <input type="checkbox" class="mycheckbox" [checked]="isAllChecked()" (change)="checkAll($event)">
+                        </th>
+                        <th>Choice Option Code</th>
+                        <th class="imageWidth">Image</th>
+                        <th>Choice Type</th>
+                        <th>Choice Option Text</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="form-group-sm bg-search">
+                        <td></td>
+                        <td>
+                            <input type="text" class="form-control" name="choiceCode" [(ngModel)]="filter.choiceCode" (keyup)="filterChoice()" >
+                        </td>
+                        <td></td>
+                        <td>
+                            <input type="text" class="form-control" name="choiceType" [(ngModel)]="filter.choiceType" (keyup)="filterChoice()"  >
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="choiceText" [(ngModel)]="filter.choiceText" (keyup)="filterChoice()" >
+                        </td>
+                    </tr>
+                    <tr *ngFor="let choice of choiceNavigate">
+                        <td class="t-checkbox">
+                            <input type="checkbox" class="mycheckbox" (change)="selectChoice()"  [(ngModel)]="choice.checked">
+                        </td>
+                        <td>{{ choice.choiceCode }} </td>
+                        <td>
+                            <img src= "{{showImage(choice)}}" alt="" width="40px" height="40px" (click)="imageModal.show() || showImage(choice,true) ">
+                        </td>
+                        <td> {{choiceType.choiceTypeDes}} [{{choiceType.choiceTypeCode}}] </td>
+                        <td>{{choice.choiceText}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <pagination [directionLinks]="false" [boundaryLinks]="true" [itemsPerPage]="itemsPerPage" [totalItems]="totalItems" [(ngModel)]="currentPage" class="pagination" firstText="&laquo;" lastText="&raquo;" (pageChanged)="pageChanged($event)" ></pagination>
+            </div>
+            <div class="pull-right">
+                <button class="btn btn-primary" (click)="addModal.show()">Add</button>
+                <button class="btn btn-primary"  [disabled]="isCheck()"  (click)="editModal.show()">Edit</button>
+                <button class="btn btn-primary"  [disabled]="isCheck()"  (click)="editModal.show()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Add -->
+<div bsModal #addModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Add Choice Option</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead class="bg-thead">
+                        <tr>
+                            <th>Choice Option Code</th>
+                            <th>Choice Type</th>
+                            <th>Choice Option Text</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="form-group-sm bg-search">
+                            <td>
+                                <input type="text" class="form-control " name="choiceTypeAbb">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="choiceTypeDes">
+                            </td>
+                            <td>
+                                <select class="form-control" name="choiceTypeParent">
+                                      <option></option>
+                                      <option>ABC 1</option>
+                                      <option>ABC 2</option>
+                                      <option>ABC 3</option>
+                                      <option>ABC 4</option>
+                                    </select>
+                            </td>
+                        </tr>
+                        <tr class="form-group-sm bg-search" *ngFor="let num of add">
+                            <td>
+                                <input type="text" class="form-control" name="choiceType">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control " name="choiceTypeAbb">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="choiceTypeDes">
+                            </td>
+                            <td>
+                                <select class="form-control" name="choiceTypeParent">
+                                      <option></option>
+                                      <option>ABC 1</option>
+                                      <option>ABC 2</option>
+                                      <option>ABC 3</option>
+                                      <option>ABC 4</option>
+                                    </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success">Save</button>
+                <button class="btn btn-success" (click)="addChoiceType()">Add</button>
+                <button class="btn btn-danger" (click)="addModal.hide()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Model -->
+<!-- Modal Edit -->
+<div bsModal #editModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Edit Choice Type</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead class="bg-thead">
+                        <tr>
+                            <th>Choice Option Code</th>
+                            <th>Choice Type</th>
+                            <th>Choice Option Text</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>...</tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success">Save</button>
+                <button class="btn btn-success">Reset</button>
+                <button class="btn btn-danger" (click)="editModal.hide()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Model -->
+
+<!-- Modal Add -->
+<div bsModal #deleteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Delete Choice Type</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success">Yes</button>
+                <button class="btn btn-danger" (click)="deleteModal.hide()">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Model -->
+
+
+<!-- Modal Image -->
+<div bsModal #imageModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="image">
+            <img src= "{{urlFullImage}}" alt="" width="850px">
+        </div>
+    </div>
+</div>
+<!-- End Model -->

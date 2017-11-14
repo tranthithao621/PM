@@ -1,0 +1,14 @@
+ul li a:visited,
+ul li a:link {
+    color: #337ab7;
+}
+
+ul li a:hover {
+    color: #1f1e1e;
+    background-color: #a4bdd1;
+}
+
+ul li a.active {
+    color: #ffffff;
+    background-color: #337ab7;
+}
